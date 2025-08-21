@@ -1,0 +1,27 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <Color x:Key="Petrol">#F3FBFD</Color>
+    <Color x:Key="TileBg">#FFFFFF</Color>
+    <Color x:Key="TileBgError">#FFE5E5</Color>
+    <Color x:Key="Accent">#007A83</Color>
+    <Color x:Key="Success">#00AFA0</Color>
+    <Color x:Key="Danger">#E53935</Color>
+    <Color x:Key="Ink">#00222B</Color>
+    <Color x:Key="InkMuted">#406F79</Color>
+
+    <SolidColorBrush x:Key="BrushPetrol" Color="{StaticResource Petrol}"/>
+    <SolidColorBrush x:Key="BrushTileBg" Color="{StaticResource TileBg}"/>
+    <SolidColorBrush x:Key="BrushTileBgError" Color="{StaticResource TileBgError}"/>
+    <SolidColorBrush x:Key="BrushAccent" Color="{StaticResource Accent}"/>
+    <SolidColorBrush x:Key="BrushSuccess" Color="{StaticResource Success}"/>
+    <SolidColorBrush x:Key="BrushDanger" Color="{StaticResource Danger}"/>
+    <SolidColorBrush x:Key="BrushInk" Color="{StaticResource Ink}"/>
+    <SolidColorBrush x:Key="BrushInkMuted" Color="{StaticResource InkMuted}"/>
+
+    <sys:Double x:Key="TileWidth">380</sys:Double>
+    <sys:Double x:Key="HistoryBarWidth">8</sys:Double>
+    <sys:Double x:Key="HistoryBarHeight">44</sys:Double>
+    <sys:Double x:Key="TitleFontSize">16</sys:Double>
+    <sys:Double x:Key="BodyFontSize">12</sys:Double>
+</ResourceDictionary>
