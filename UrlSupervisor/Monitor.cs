@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace UrlSupervisor
 {
-    public class Monitor : INotifyPropertyChanged
+    public class Monitor : INotifyPropertyChanged, IDisposable
     {
         public string Name { get; private set; }
         public string Url { get; private set; }
@@ -69,7 +69,14 @@ namespace UrlSupervisor
         {
             if (!IsRunning) return;
             _cts?.Cancel();
+            _cts?.Dispose();
             IsRunning = false;
+        }
+
+        public void Dispose()
+        {
+            Stop();
+            _cts?.Dispose();
         }
 
         public async Task PingOnceAsync()
