@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Monitors>
+  <Monitor name="Satellisoft Site" url="https://example.com/" intervalSeconds="10" order="1" enabled="true" timeoutSeconds="5" group="Public" tags="site,prod" />
+  <Monitor name="JSON Placeholder" url="https://jsonplaceholder.typicode.com/todos/1" intervalSeconds="15" order="2" enabled="true" timeoutSeconds="5" group="API" tags="demo,backend" />
+  <Monitor name="Bad Endpoint" url="https://example.com/404" intervalSeconds="8" order="3" enabled="true" timeoutSeconds="3" group="Public" tags="site" />
+</Monitors>

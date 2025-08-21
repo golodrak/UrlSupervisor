@@ -1,0 +1,190 @@
+<Window x:Class="UrlSupervisor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UrlSupervisor"
+        mc:Ignorable="d"
+        Title="URL Supervisor" Height="900" Width="1500" Background="{StaticResource BrushPetrol}">
+    <Window.Resources>
+        <local:BooleanToBrushConverter x:Key="BoolToBrush" />
+        <local:InvertedBoolToBrushConverter x:Key="InvertedBoolToBrush" />
+        <local:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+        <local:RunningToGlyphConverter x:Key="RunningGlyph" />
+
+        <DataTemplate x:Key="HistoryItemTemplate">
+            <Rectangle Width="{DynamicResource HistoryBarWidth}" Height="{DynamicResource HistoryBarHeight}" Margin="1"
+                       Fill="{Binding Success, Converter={StaticResource BoolToBrush}}"
+                       RadiusX="3" RadiusY="3">
+                <Rectangle.ToolTip>
+                    <ToolTip Content="{Binding Tooltip}"/>
+                </Rectangle.ToolTip>
+            </Rectangle>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#06222C" Padding="12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="URL Supervisor" FontSize="22" FontWeight="Bold" Margin="0,0,16,0"/>
+                    <TextBlock Text="{Binding SummaryText}" Foreground="{StaticResource BrushInkMuted}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBox Width="260" x:Name="SearchBox" TextChanged="SearchBox_TextChanged" ToolTip="Filtrer par nom ou URL" />
+                    <ComboBox x:Name="GroupFilter" Width="160" Margin="8,0,0,0" SelectionChanged="GroupFilter_SelectionChanged" ToolTip="Filtrer par groupe"/>
+                    <ComboBox x:Name="TagFilter" Width="160" Margin="8,0,0,0" SelectionChanged="TagFilter_SelectionChanged" ToolTip="Filtrer par tag"/>
+                    <ToggleButton x:Name="ToggleErrors" Content="Erreurs" Margin="8,0,0,0" Padding="10,6" Style="{StaticResource GhostToggle}" Checked="ToggleErrors_Checked" Unchecked="ToggleErrors_Checked"/>
+                    <ToggleButton x:Name="ToggleRunning" Content="En cours" Margin="8,0,0,0" Padding="10,6" Style="{StaticResource GhostToggle}" Checked="ToggleRunning_Checked" Unchecked="ToggleRunning_Checked"/>
+                    <ToggleButton x:Name="ToggleCompact" Content="Compact" Margin="8,0,0,0" Padding="10,6" Style="{StaticResource GhostToggle}" Checked="ToggleCompact_Checked" Unchecked="ToggleCompact_Checked"/>
+                    <ToggleButton x:Name="ToggleTheme" Content="☾/☼" Margin="8,0,0,0" Padding="10,6" Style="{StaticResource GhostToggle}" Checked="ToggleTheme_Checked" Unchecked="ToggleTheme_Checked" ToolTip="Basculer thème"/>
+                    <Button Content="" Style="{StaticResource IconButton}" ToolTip="Recharger le XML" Click="ReloadXml_Click"/>
+                    <Button Content="" Style="{StaticResource IconButton}" ToolTip="Exporter CSV des pannes" Click="ExportCsv_Click"/>
+                    <Button Content="" Style="{StaticResource IconButton}" ToolTip="Ajouter un site" Click="AddNew_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Content -->
+        <ScrollViewer Grid.Row="1">
+            <ListBox ItemsSource="{Binding GroupedView}" BorderThickness="0" Background="Transparent">
+                <ListBox.GroupStyle>
+                    <GroupStyle>
+                        <GroupStyle.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name, Mode=OneWay}" FontWeight="Bold" Margin="12,12,12,4" />
+                            </DataTemplate>
+                        </GroupStyle.HeaderTemplate>
+                        <GroupStyle.Panel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </GroupStyle.Panel>
+                    </GroupStyle>
+                </ListBox.GroupStyle>
+
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type local:Monitor}">
+                        <Border Style="{StaticResource TileBorderStyle}" MouseLeftButtonUp="Tile_MouseLeftButtonUp">
+                            <Grid Width="{DynamicResource TileWidth}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <DockPanel>
+                                    <Ellipse Width="10" Height="10" Margin="0,2,8,0"
+                                             Fill="{Binding HasError, Mode=OneWay, Converter={StaticResource InvertedBoolToBrush}}"/>
+                                    <TextBlock DockPanel.Dock="Left" Text="{Binding Name, Mode=OneWay}" FontSize="{DynamicResource TitleFontSize}" FontWeight="Bold"/>
+                                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                                        <Button Content="" Style="{StaticResource IconButton}" ToolTip="Ping maintenant" Click="PingNow_Click"/>
+                                        <Button Content="{Binding IsRunning, Mode=OneWay, Converter={StaticResource RunningGlyph}}" Style="{StaticResource IconButton}" ToolTip="Démarrer / Arrêter" Click="StartStop_Click"/>
+                                        <Button Content="" Style="{StaticResource IconButton}" ToolTip="Modifier" Click="EditTile_Click"/>
+                                        <Button Content="" Style="{StaticResource IconButton}" ToolTip="Supprimer" Click="DeleteTile_Click"/>
+                                    </StackPanel>
+                                </DockPanel>
+
+                                <TextBlock Grid.Row="1" Text="{Binding Url, Mode=OneWay}" FontSize="{DynamicResource BodyFontSize}" Foreground="{StaticResource BrushInkMuted}" TextTrimming="CharacterEllipsis"/>
+
+                                <Border Grid.Row="2" Background="#05222E" CornerRadius="10" Padding="6" Margin="0,10,0,6">
+                                    <ItemsControl ItemsSource="{Binding LastResults, Mode=OneWay}" ItemTemplate="{StaticResource HistoryItemTemplate}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
+                                </Border>
+
+                                <StackPanel Grid.Row="3" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Border Background="#1AFFFFFF" CornerRadius="8" Padding="8,4" Margin="0,0,6,0">
+                                        <TextBlock Text="{Binding UptimeText, Mode=OneWay}" FontWeight="SemiBold"/>
+                                    </Border>
+                                    <Border Background="#1AFFFFFF" CornerRadius="8" Padding="8,4" Margin="0,0,6,0">
+                                        <TextBlock>
+                                            <Run Text="Intervalle "/><Run Text="{Binding IntervalSeconds, Mode=OneWay}"/><Run Text="s"/>
+                                        </TextBlock>
+                                    </Border>
+                                    <ItemsControl>
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="#1AFFFFFF" CornerRadius="8" Padding="8,4" Margin="0,0,6,0">
+                                                    <TextBlock Text="{Binding}" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                        <ItemsControl.ItemsSource>
+                                            <Binding Path="Tags" Mode="OneWay"/>
+                                        </ItemsControl.ItemsSource>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </ScrollViewer>
+
+        <!-- Editor overlay -->
+        <Border Grid.RowSpan="2" Background="#80000000" Visibility="{Binding IsEditPanelOpen, Converter={StaticResource BoolToVisibility}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="480" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Background="Transparent" MouseLeftButtonUp="CancelEdit_Click"/>
+                <Border Grid.Column="1" Background="{StaticResource BrushTileBg}" Padding="18" BorderBrush="#1B7F91" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="{Binding EditPanelTitle}" FontSize="18" FontWeight="Bold" Margin="0,0,0,8"/>
+                        <TextBlock Text="Nom" />
+                        <TextBox Text="{Binding Editing.Name, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Text="URL" />
+                        <TextBox Text="{Binding Editing.Url, UpdateSourceTrigger=PropertyChanged}" />
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel Width="220">
+                                <TextBlock Text="Intervalle (s)"/>
+                                <TextBox Text="{Binding Editing.IntervalSeconds, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                            <StackPanel Width="220" Margin="16,0,0,0">
+                                <TextBlock Text="Timeout (s)"/>
+                                <TextBox Text="{Binding Editing.TimeoutSeconds, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel Width="220">
+                                <TextBlock Text="Ordre"/>
+                                <TextBox Text="{Binding Editing.Order, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                            <StackPanel Width="220" Margin="16,0,0,0">
+                                <TextBlock Text="Groupe"/>
+                                <TextBox Text="{Binding Editing.Group, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                        </StackPanel>
+                        <TextBlock Text="Tags (séparés par , ou ;)"/>
+                        <TextBox Text="{Binding Editing.Tags, UpdateSourceTrigger=PropertyChanged}" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+                            <Button Content="Annuler" Style="{StaticResource GhostButton}" Click="CancelEdit_Click"/>
+                            <Button Content="Enregistrer" Click="SaveEdit_Click"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
