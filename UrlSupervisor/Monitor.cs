@@ -74,7 +74,8 @@ namespace UrlSupervisor
 
         public async Task PingOnceAsync()
         {
-            await DoCheckAsync(new HttpClient { Timeout = TimeSpan.FromSeconds(TimeoutSeconds) }, default);
+            using var http = new HttpClient() { Timeout = TimeSpan.FromSeconds(TimeoutSeconds) };
+            await DoCheckAsync(http, default);
         }
 
         public void UpdateFromEditable(EditableMonitor e)
