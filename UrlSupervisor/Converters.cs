@@ -6,27 +6,41 @@ using System.Windows.Media;
 
 namespace UrlSupervisor
 {
-    public class BooleanToBrushConverter : IValueConverter
+    public class BoolToBrushConverter : IValueConverter
     {
-        private static readonly SolidColorBrush Green = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x30, 0xD4, 0xC1));
-        private static readonly SolidColorBrush Red   = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0x5A, 0x5A));
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            bool b = value is bool v && v;
-            return b ? Green : Red;
-        }
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
-    }
+        private static readonly SolidColorBrush GreenBrush;
+        private static readonly SolidColorBrush RedBrush;
 
-    public class InvertedBoolToBrushConverter : IValueConverter
-    {
-        private static readonly SolidColorBrush Green = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0x30, 0xD4, 0xC1));
-        private static readonly SolidColorBrush Red   = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0x5A, 0x5A));
+        static BoolToBrushConverter()
+        {
+            GreenBrush = new SolidColorBrush(Color.FromRgb(0x30, 0xD4, 0xC1));
+            GreenBrush.Freeze();
+            RedBrush = new SolidColorBrush(Color.FromRgb(0xFF, 0x5A, 0x5A));
+            RedBrush.Freeze();
+        }
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            bool b = value is bool v && v;
-            return b ? Red : Green;
+            bool result = value is bool b && b;
+
+            bool invert = false;
+            if (parameter is bool boolParam)
+            {
+                invert = boolParam;
+            }
+            else if (parameter is string strParam && bool.TryParse(strParam, out var parsed))
+            {
+                invert = parsed;
+            }
+
+            if (invert)
+            {
+                result = !result;
+            }
+
+            return result ? GreenBrush : RedBrush;
         }
+
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
     }
 
