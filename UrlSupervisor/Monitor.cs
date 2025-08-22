@@ -14,13 +14,20 @@ namespace UrlSupervisor
 {
     public class Monitor : INotifyPropertyChanged, IDisposable
     {
-        public string Name { get; private set; }
-        public string Url { get; private set; }
-        public int Order { get; private set; }
-        public int IntervalSeconds { get; private set; }
-        public int TimeoutSeconds { get; private set; }
-        public string Group { get; private set; } = "";
-        public List<string> Tags { get; private set; } = new List<string>();
+        private string _name = "";
+        public string Name { get => _name; private set { _name = value; OnPropertyChanged(); } }
+        private string _url = "";
+        public string Url { get => _url; private set { _url = value; OnPropertyChanged(); } }
+        private int _order;
+        public int Order { get => _order; private set { _order = value; OnPropertyChanged(); } }
+        private int _intervalSeconds;
+        public int IntervalSeconds { get => _intervalSeconds; private set { _intervalSeconds = value; OnPropertyChanged(); } }
+        private int _timeoutSeconds;
+        public int TimeoutSeconds { get => _timeoutSeconds; private set { _timeoutSeconds = value; OnPropertyChanged(); } }
+        private string _group = "";
+        public string Group { get => _group; private set { _group = value; OnPropertyChanged(); } }
+        private List<string> _tags = new List<string>();
+        public List<string> Tags { get => _tags; private set { _tags = value; OnPropertyChanged(); } }
 
         private ImageSource? _favicon;
         public ImageSource? Favicon { get => _favicon; private set { _favicon = value; OnPropertyChanged(nameof(Favicon)); } }
@@ -29,24 +36,25 @@ namespace UrlSupervisor
         private const int MaxResults = 60;
 
         private bool _isRunning;
-        public bool IsRunning { get => _isRunning; private set { _isRunning = value; OnPropertyChanged(nameof(IsRunning)); OnPropertyChanged(nameof(StatusText)); } }
+        public bool IsRunning { get => _isRunning; private set { _isRunning = value; OnPropertyChanged(); OnPropertyChanged(nameof(StatusText)); } }
 
         private bool _hasError;
-        public bool HasError { get => _hasError; private set { _hasError = value; OnPropertyChanged(nameof(HasError)); } }
+        public bool HasError { get => _hasError; private set { _hasError = value; OnPropertyChanged(); } }
 
         private bool? _lastSuccess = null;
         private DateTime _lastErrorAt = DateTime.MinValue;
         private DateTime _startedAt = DateTime.UtcNow;
         private CancellationTokenSource? _cts;
 
-        public string UptimeText { get; private set; } = "—";
+        private string _uptimeText = "—";
+        public string UptimeText { get => _uptimeText; private set { _uptimeText = value; OnPropertyChanged(); } }
         public string StatusText => IsRunning ? "En cours" : "Arrêté";
 
         public List<DowntimeEvent> Downtimes { get; } = new List<DowntimeEvent>();
         private DowntimeEvent? _openDowntime = null;
 
         public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged(string prop) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
+        private void OnPropertyChanged([CallerMemberName] string? prop = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
 
         public event Action<Monitor, bool, bool>? StatusChanged;
 
@@ -116,7 +124,6 @@ namespace UrlSupervisor
             DateTime since = _lastErrorAt == DateTime.MinValue ? _startedAt : _lastErrorAt;
             var span = DateTime.UtcNow - since;
             UptimeText = $"{(int)span.TotalHours:00}:{span.Minutes:00}:{span.Seconds:00}";
-            OnPropertyChanged(nameof(UptimeText));
         }
 
         private async Task LoopAsync(CancellationToken ct)

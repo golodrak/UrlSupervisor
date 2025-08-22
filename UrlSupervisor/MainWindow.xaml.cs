@@ -13,6 +13,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 using System.Xml.Linq;
+using System.Runtime.CompilerServices;
 
 namespace UrlSupervisor
 {
@@ -44,7 +45,7 @@ namespace UrlSupervisor
         public string EditPanelTitle { get => _editPanelTitle; set { _editPanelTitle = value; OnPropertyChanged(nameof(EditPanelTitle)); } }
 
         public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged(string prop) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
+        private void OnPropertyChanged([CallerMemberName] string? prop = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
 
         public MainWindow()
         {
