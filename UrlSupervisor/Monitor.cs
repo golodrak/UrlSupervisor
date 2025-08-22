@@ -6,6 +6,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.IO;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace UrlSupervisor
 {
@@ -18,6 +21,9 @@ namespace UrlSupervisor
         public int TimeoutSeconds { get; private set; }
         public string Group { get; private set; } = "";
         public List<string> Tags { get; private set; } = new List<string>();
+
+        private ImageSource? _favicon;
+        public ImageSource? Favicon { get => _favicon; private set { _favicon = value; OnPropertyChanged(nameof(Favicon)); } }
 
         public ObservableCollection<MonitorResult> LastResults { get; } = new();
         private const int MaxResults = 60;
@@ -53,6 +59,8 @@ namespace UrlSupervisor
             TimeoutSeconds = Math.Max(1, timeoutSeconds);
             Group = group ?? "";
             if (tags != null) Tags = tags.ToList();
+
+            _ = LoadFaviconAsync();
         }
 
         public async Task StartAsync()
@@ -100,6 +108,7 @@ namespace UrlSupervisor
             OnPropertyChanged(nameof(IntervalSeconds));
             OnPropertyChanged(nameof(TimeoutSeconds));
             OnPropertyChanged(nameof(Group));
+            _ = LoadFaviconAsync();
         }
 
         public void TickUptime()
@@ -169,6 +178,26 @@ namespace UrlSupervisor
                 });
                 while (LastResults.Count > MaxResults) LastResults.RemoveAt(0);
             });
+        }
+
+        private async Task LoadFaviconAsync()
+        {
+            try
+            {
+                var uri = new Uri(Url);
+                var faviconUri = new Uri($"{uri.Scheme}://{uri.Host}/favicon.ico");
+                using var http = new HttpClient() { Timeout = TimeSpan.FromSeconds(TimeoutSeconds) };
+                var bytes = await http.GetByteArrayAsync(faviconUri);
+                using var ms = new MemoryStream(bytes);
+                var img = new BitmapImage();
+                img.BeginInit();
+                img.StreamSource = ms;
+                img.CacheOption = BitmapCacheOption.OnLoad;
+                img.EndInit();
+                img.Freeze();
+                Favicon = img;
+            }
+            catch { }
         }
     }
 
