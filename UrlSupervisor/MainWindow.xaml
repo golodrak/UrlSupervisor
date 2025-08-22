@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UrlSupervisor"
         mc:Ignorable="d"
-        Title="URL Supervisor" Height="900" Width="1500" Background="{StaticResource BrushPetrol}">
+        Title="URL Supervisor" Height="900" Width="1500" Background="{DynamicResource BrushPetrol}">
     <Window.Resources>
         <local:BoolToBrushConverter x:Key="BoolToBrush" />
         <local:BoolToVisibilityConverter x:Key="BoolToVisibility" />
@@ -29,7 +29,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <!-- Header -->
-        <Border Grid.Row="0" Background="#06222C" Padding="12">
+        <Border Grid.Row="0" Background="{DynamicResource BrushPetrol}" Padding="12">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -37,7 +37,7 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="URL Supervisor" FontSize="22" FontWeight="Bold" Margin="0,0,16,0"/>
-                    <TextBlock Text="{Binding SummaryText}" Foreground="{StaticResource BrushInkMuted}" />
+                    <TextBlock Text="{Binding SummaryText}" Foreground="{DynamicResource BrushInkMuted}" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBox Width="260" x:Name="SearchBox" TextChanged="SearchBox_TextChanged" ToolTip="Filtrer par nom ou URL" />
@@ -96,9 +96,9 @@
                                     </StackPanel>
                                 </DockPanel>
 
-                                <TextBlock Grid.Row="1" Text="{Binding Url, Mode=OneWay}" FontSize="{DynamicResource BodyFontSize}" Foreground="{StaticResource BrushInkMuted}" TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Grid.Row="1" Text="{Binding Url, Mode=OneWay}" FontSize="{DynamicResource BodyFontSize}" Foreground="{DynamicResource BrushInkMuted}" TextTrimming="CharacterEllipsis"/>
 
-                                <Border Grid.Row="2" Background="#05222E" CornerRadius="10" Padding="6" Margin="0,10,0,6">
+                                <Border Grid.Row="2" Background="{DynamicResource BrushTileBg}" CornerRadius="10" Padding="6" Margin="0,10,0,6">
                                     <ItemsControl ItemsSource="{Binding LastResults, Mode=OneWay}" ItemTemplate="{StaticResource HistoryItemTemplate}">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
@@ -150,7 +150,7 @@
                     <ColumnDefinition Width="480" />
                 </Grid.ColumnDefinitions>
                 <Border Grid.Column="0" Background="Transparent" MouseLeftButtonUp="CancelEdit_Click"/>
-                <Border Grid.Column="1" Background="{StaticResource BrushTileBg}" Padding="18" BorderBrush="#1B7F91" BorderThickness="1">
+                <Border Grid.Column="1" Background="{DynamicResource BrushTileBg}" Padding="18" BorderBrush="{DynamicResource BrushAccent}" BorderThickness="1">
                     <StackPanel>
                         <TextBlock Text="{Binding EditPanelTitle}" FontSize="18" FontWeight="Bold" Margin="0,0,0,8"/>
                         <TextBlock Text="Nom" />
