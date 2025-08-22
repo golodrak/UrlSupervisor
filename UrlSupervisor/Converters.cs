@@ -8,34 +8,37 @@ namespace UrlSupervisor
 {
     public class BoolToBrushConverter : IValueConverter
     {
-        private static readonly SolidColorBrush Green;
-        private static readonly SolidColorBrush Red;
+        private static readonly SolidColorBrush GreenBrush;
+        private static readonly SolidColorBrush RedBrush;
 
         static BoolToBrushConverter()
         {
-            Green = new SolidColorBrush(Color.FromRgb(0x30, 0xD4, 0xC1));
-            Green.Freeze();
-            Red = new SolidColorBrush(Color.FromRgb(0xFF, 0x5A, 0x5A));
-            Red.Freeze();
+            GreenBrush = new SolidColorBrush(Color.FromRgb(0x30, 0xD4, 0xC1));
+            GreenBrush.Freeze();
+            RedBrush = new SolidColorBrush(Color.FromRgb(0xFF, 0x5A, 0x5A));
+            RedBrush.Freeze();
         }
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            bool b = value is bool v && v;
+            bool result = value is bool b && b;
+
             bool invert = false;
-            if (parameter is bool pb)
+            if (parameter is bool boolParam)
             {
-                invert = pb;
+                invert = boolParam;
             }
-            else if (parameter is string ps && bool.TryParse(ps, out var parsed))
+            else if (parameter is string strParam && bool.TryParse(strParam, out var parsed))
             {
                 invert = parsed;
             }
+
             if (invert)
             {
-                b = !b;
+                result = !result;
             }
-            return b ? Green : Red;
+
+            return result ? GreenBrush : RedBrush;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();

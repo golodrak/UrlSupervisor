@@ -84,7 +84,7 @@
 
                                 <DockPanel>
                                     <Ellipse Width="10" Height="10" Margin="0,2,8,0"
-                                             Fill="{Binding HasError, Mode=OneWay, Converter={StaticResource BoolToBrush}, ConverterParameter=true}"/>
+                                             Fill="{Binding HasError, Mode=OneWay, Converter={StaticResource BoolToBrush}, ConverterParameter=True}"/>
                                     <TextBlock DockPanel.Dock="Left" Text="{Binding Name, Mode=OneWay}" FontSize="{DynamicResource TitleFontSize}" FontWeight="Bold"/>
                                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                                         <Button Content="" Style="{StaticResource IconButton}" ToolTip="Ping maintenant" Click="PingNow_Click"/>
