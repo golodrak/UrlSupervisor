@@ -16,31 +16,41 @@ namespace UrlSupervisor
     public class Monitor : INotifyPropertyChanged, IDisposable
     {
         private string _name = "";
-        public string Name { get => _name; private set { _name = value; OnPropertyChanged(); } }
+        public string Name { get => _name; private set { SetField(ref _name, value); } }
         private string _url = "";
-        public string Url { get => _url; private set { _url = value; OnPropertyChanged(); } }
+        public string Url { get => _url; private set { SetField(ref _url, value); } }
         private int _order;
-        public int Order { get => _order; private set { _order = value; OnPropertyChanged(); } }
+        public int Order { get => _order; private set { SetField(ref _order, value); } }
         private int _intervalSeconds;
-        public int IntervalSeconds { get => _intervalSeconds; private set { _intervalSeconds = value; OnPropertyChanged(); } }
+        public int IntervalSeconds { get => _intervalSeconds; private set { SetField(ref _intervalSeconds, value); } }
         private int _timeoutSeconds;
-        public int TimeoutSeconds { get => _timeoutSeconds; private set { _timeoutSeconds = value; OnPropertyChanged(); } }
+        public int TimeoutSeconds { get => _timeoutSeconds; private set { SetField(ref _timeoutSeconds, value); } }
         private string _group = "";
-        public string Group { get => _group; private set { _group = value; OnPropertyChanged(); } }
+        public string Group { get => _group; private set { SetField(ref _group, value); } }
         private List<string> _tags = new List<string>();
-        public List<string> Tags { get => _tags; private set { _tags = value; OnPropertyChanged(); } }
+        public List<string> Tags { get => _tags; private set { SetField(ref _tags, value); } }
 
         private ImageSource? _favicon;
-        public ImageSource? Favicon { get => _favicon; private set { _favicon = value; OnPropertyChanged(nameof(Favicon)); } }
+        public ImageSource? Favicon { get => _favicon; private set { SetField(ref _favicon, value); } }
 
         public ObservableCollection<MonitorResult> LastResults { get; } = new();
         private const int MaxResults = 60;
 
         private bool _isRunning;
-        public bool IsRunning { get => _isRunning; private set { _isRunning = value; OnPropertyChanged(); OnPropertyChanged(nameof(StatusText)); } }
+        public bool IsRunning
+        {
+            get => _isRunning;
+            private set
+            {
+                if (SetField(ref _isRunning, value))
+                {
+                    OnPropertyChanged(nameof(StatusText));
+                }
+            }
+        }
 
         private bool _hasError;
-        public bool HasError { get => _hasError; private set { _hasError = value; OnPropertyChanged(); } }
+        public bool HasError { get => _hasError; private set { SetField(ref _hasError, value); } }
 
         private bool? _lastSuccess = null;
         private DateTime _lastErrorAt = DateTime.MinValue;
@@ -48,7 +58,7 @@ namespace UrlSupervisor
         private CancellationTokenSource? _cts;
 
         private string _uptimeText = "—";
-        public string UptimeText { get => _uptimeText; private set { _uptimeText = value; OnPropertyChanged(); } }
+        public string UptimeText { get => _uptimeText; private set { SetField(ref _uptimeText, value); } }
         public string StatusText => IsRunning ? "En cours" : "Arrêté";
 
         public List<DowntimeEvent> Downtimes { get; } = new List<DowntimeEvent>();
@@ -56,6 +66,14 @@ namespace UrlSupervisor
 
         public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string? prop = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
+
+        private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            OnPropertyChanged(propertyName);
+            return true;
+        }
 
         public event Action<Monitor, bool, bool>? StatusChanged;
 
