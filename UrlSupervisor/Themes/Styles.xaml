@@ -72,6 +72,20 @@
         </Setter>
     </Style>
 
+    <Style TargetType="ToolTip">
+        <Setter Property="Foreground" Value="{DynamicResource BrushInk}"/>
+        <Setter Property="Background" Value="{DynamicResource BrushTileBg}"/>
+    </Style>
+
+    <Style TargetType="ComboBox">
+        <Setter Property="Foreground" Value="{DynamicResource BrushInk}"/>
+        <Setter Property="Background" Value="{DynamicResource BrushTileBg}"/>
+    </Style>
+
+    <Style TargetType="ComboBoxItem">
+        <Setter Property="Foreground" Value="{DynamicResource BrushInk}"/>
+    </Style>
+
     <Style TargetType="TextBox">
         <Setter Property="Background" Value="{DynamicResource BrushTileBg}"/>
         <Setter Property="Foreground" Value="{DynamicResource BrushInk}"/>
