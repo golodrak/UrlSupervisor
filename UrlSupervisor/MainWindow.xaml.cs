@@ -129,7 +129,19 @@ namespace UrlSupervisor
                 var m = new Monitor(name, url, order, interval, timeout, group, tags);
                 Monitors.Add(m);
                 if (enabled) _ = m.StartAsync();
-                m.PropertyChanged += (_, __) => RefreshFilter();
+                m.PropertyChanged += (_, e) =>
+                {
+                    if (e.PropertyName == nameof(Monitor.HasError) ||
+                        e.PropertyName == nameof(Monitor.IsRunning) ||
+                        e.PropertyName == nameof(Monitor.Group) ||
+                        e.PropertyName == nameof(Monitor.Tags) ||
+                        e.PropertyName == nameof(Monitor.Order) ||
+                        e.PropertyName == nameof(Monitor.Name) ||
+                        e.PropertyName == nameof(Monitor.Url))
+                    {
+                        RefreshFilter();
+                    }
+                };
             }
         }
 
