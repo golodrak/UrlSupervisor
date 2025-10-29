@@ -31,8 +31,8 @@ namespace UrlSupervisor
         private bool _filterErrorsOnly = false;
         private bool _filterRunningOnly = false;
         private string _searchQuery = "";
-        private string _filterGroup = "";
-        private string _filterTag = "";
+        private string? _filterGroup;
+        private string? _filterTag;
         private bool _compactMode = false;
         private bool _isLightTheme = false;
 
@@ -90,7 +90,7 @@ namespace UrlSupervisor
                 if (!(m.Name.ToLowerInvariant().Contains(q) || m.Url.ToLowerInvariant().Contains(q))) return false;
             }
             if (!string.IsNullOrWhiteSpace(_filterGroup) && m.Group != _filterGroup) return false;
-            if (!string.IsNullOrWhiteSpace(_filterTag) && !(m.Tags?.Contains(_filterTag) ?? false)) return false;
+            if (!string.IsNullOrWhiteSpace(_filterTag) && !m.Tags.Any(t => string.Equals(t, _filterTag, StringComparison.InvariantCultureIgnoreCase))) return false;
             return true;
         }
 
@@ -135,23 +135,72 @@ namespace UrlSupervisor
 
         private void RebuildFiltersChoices()
         {
-            var groups = new List<string> { "" };
-            groups.AddRange(Monitors.Select(m => m.Group).Where(g => !string.IsNullOrWhiteSpace(g)).Distinct().OrderBy(x => x));
-            GroupFilter.ItemsSource = groups;
-            GroupFilter.SelectedIndex = 0;
+            var previousGroup = _filterGroup;
+            var previousTag = _filterTag;
 
-            var tags = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
-            foreach (var m in Monitors) foreach (var t in m.Tags) tags.Add(t);
-            var tagList = new List<string> { "" };
-            tagList.AddRange(tags.OrderBy(x => x));
-            TagFilter.ItemsSource = tagList;
-            TagFilter.SelectedIndex = 0;
+            var totalMonitors = Monitors.Count;
+
+            var groupOptions = new List<FilterOption>
+            {
+                new("Tous les groupes", null, totalMonitors)
+            };
+
+            groupOptions.AddRange(
+                Monitors
+                    .Where(m => !string.IsNullOrWhiteSpace(m.Group))
+                    .GroupBy(m => m.Group)
+                    .OrderBy(g => g.Key)
+                    .Select(g => new FilterOption(g.Key, g.Key, g.Count())));
+
+            GroupFilter.ItemsSource = groupOptions;
+            GroupFilter.SelectedItem = groupOptions.First();
+
+            if (!string.IsNullOrWhiteSpace(previousGroup))
+            {
+                var match = groupOptions.FirstOrDefault(o => string.Equals(o.Value, previousGroup, StringComparison.InvariantCulture));
+                if (match != null) GroupFilter.SelectedItem = match;
+            }
+
+            var tagOptions = new List<FilterOption>
+            {
+                new("Tous les tags", null, totalMonitors)
+            };
+
+            tagOptions.AddRange(
+                Monitors
+                    .SelectMany(m => m.Tags.Select(t => new { Tag = t, Monitor = m }))
+                    .Where(x => !string.IsNullOrWhiteSpace(x.Tag))
+                    .GroupBy(x => x.Tag, StringComparer.InvariantCultureIgnoreCase)
+                    .OrderBy(g => g.Key, StringComparer.InvariantCultureIgnoreCase)
+                    .Select(g => new FilterOption(g.Key, g.First().Tag, g.Select(x => x.Monitor).Distinct().Count())));
+
+            TagFilter.ItemsSource = tagOptions;
+            TagFilter.SelectedItem = tagOptions.First();
+
+            if (!string.IsNullOrWhiteSpace(previousTag))
+            {
+                var matchTag = tagOptions.FirstOrDefault(o => string.Equals(o.Value, previousTag, StringComparison.InvariantCultureIgnoreCase));
+                if (matchTag != null) TagFilter.SelectedItem = matchTag;
+            }
         }
 
         // Header interactions
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e) { _searchQuery = (sender as System.Windows.Controls.TextBox)?.Text ?? ""; RefreshFilter(); }
-        private void GroupFilter_SelectionChanged(object sender, SelectionChangedEventArgs e) { _filterGroup = GroupFilter.SelectedItem as string ?? ""; RefreshFilter(); }
-        private void TagFilter_SelectionChanged(object sender, SelectionChangedEventArgs e) { _filterTag = TagFilter.SelectedItem as string ?? ""; RefreshFilter(); }
+        private void GroupFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            _filterGroup = (GroupFilter.SelectedItem as FilterOption)?.Value;
+            RefreshFilter();
+        }
+        private void TagFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            _filterTag = (TagFilter.SelectedItem as FilterOption)?.Value;
+            RefreshFilter();
+        }
+
+        private sealed record FilterOption(string Label, string? Value, int Count)
+        {
+            public string Display => Count >= 0 ? $"{Label} ({Count})" : Label;
+        }
         private void ToggleErrors_Checked(object sender, RoutedEventArgs e) { _filterErrorsOnly = (sender as ToggleButton)?.IsChecked == true; RefreshFilter(); }
         private void ToggleRunning_Checked(object sender, RoutedEventArgs e) { _filterRunningOnly = (sender as ToggleButton)?.IsChecked == true; RefreshFilter(); }
         private void ToggleCompact_Checked(object sender, RoutedEventArgs e)

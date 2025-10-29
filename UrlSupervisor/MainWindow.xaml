@@ -12,6 +12,29 @@
         <local:RunningToGlyphConverter x:Key="RunningGlyph" />
         <local:NullToVisibilityConverter x:Key="NullToVisibility" />
 
+        <DataTemplate x:Key="FilterComboItemTemplate">
+            <Grid ToolTip="{Binding Display}" Margin="0,2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding Label}"
+                           TextTrimming="CharacterEllipsis"
+                           Foreground="{DynamicResource BrushInk}"
+                           VerticalAlignment="Center"/>
+                <Border Grid.Column="1"
+                        Background="{DynamicResource BrushTileBg}"
+                        CornerRadius="10"
+                        Padding="8,2"
+                        Margin="12,0,0,0">
+                    <TextBlock Text="{Binding Count}"
+                               FontSize="11"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource BrushInkMuted}"/>
+                </Border>
+            </Grid>
+        </DataTemplate>
+
         <DataTemplate x:Key="HistoryItemTemplate">
             <Rectangle Width="{DynamicResource HistoryBarWidth}" Height="{DynamicResource HistoryBarHeight}" Margin="1"
                        Fill="{Binding Success, Converter={StaticResource BoolToBrush}}"
@@ -41,8 +64,26 @@
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBox Width="260" x:Name="SearchBox" TextChanged="SearchBox_TextChanged" ToolTip="Filtrer par nom ou URL" />
-                    <ComboBox x:Name="GroupFilter" Width="160" Margin="8,0,0,0" SelectionChanged="GroupFilter_SelectionChanged" ToolTip="Filtrer par groupe"/>
-                    <ComboBox x:Name="TagFilter" Width="160" Margin="8,0,0,0" SelectionChanged="TagFilter_SelectionChanged" ToolTip="Filtrer par tag"/>
+                    <ComboBox x:Name="GroupFilter"
+                              MinWidth="220"
+                              Margin="8,0,0,0"
+                              Padding="8,4"
+                              HorizontalContentAlignment="Stretch"
+                              SelectionChanged="GroupFilter_SelectionChanged"
+                              ItemTemplate="{StaticResource FilterComboItemTemplate}"
+                              SelectedValuePath="Value"
+                              ToolTip="Filtrer par groupe"
+                              TextSearch.TextPath="Display"/>
+                    <ComboBox x:Name="TagFilter"
+                              MinWidth="220"
+                              Margin="8,0,0,0"
+                              Padding="8,4"
+                              HorizontalContentAlignment="Stretch"
+                              SelectionChanged="TagFilter_SelectionChanged"
+                              ItemTemplate="{StaticResource FilterComboItemTemplate}"
+                              SelectedValuePath="Value"
+                              ToolTip="Filtrer par tag"
+                              TextSearch.TextPath="Display"/>
                     <ToggleButton x:Name="ToggleErrors" Content="Erreurs" Margin="8,0,0,0" Padding="10,6" Style="{StaticResource GhostToggle}" Checked="ToggleErrors_Checked" Unchecked="ToggleErrors_Checked"/>
                     <ToggleButton x:Name="ToggleRunning" Content="En cours" Margin="8,0,0,0" Padding="10,6" Style="{StaticResource GhostToggle}" Checked="ToggleRunning_Checked" Unchecked="ToggleRunning_Checked"/>
                     <ToggleButton x:Name="ToggleCompact" Content="Compact" Margin="8,0,0,0" Padding="10,6" Style="{StaticResource GhostToggle}" Checked="ToggleCompact_Checked" Unchecked="ToggleCompact_Checked"/>
